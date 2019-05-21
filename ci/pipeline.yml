@@ -54,9 +54,10 @@ jobs:
   - get: concourse-terraform-image
   - task: terraform-plan
     image: concourse-terraform-image
-    file: concourse-terraform/tasks/plan.yaml
+    file: source/ci/task_tf_plan.yml
     input_mapping: { terraform-source-dir: source }
     params:
+      ERROR_ON_NO_CHANGES: false
       TF_BACKEND_TYPE: s3
       TF_BACKEND_CONFIG_bucket: ((tf-bucket))
       TF_BACKEND_CONFIG_key: s3pypi.tfstate
@@ -65,4 +66,3 @@ jobs:
       TF_BACKEND_CONFIG_secret_key: ((aws-secret-access-key))
       TF_VAR_aws_access_key: ((aws-access-key-id))
       TF_VAR_aws_secret_key: ((aws-secret-access-key))
-

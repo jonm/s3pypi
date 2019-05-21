@@ -1,0 +1,44 @@
+---
+platform: linux
+inputs:
+- name: concourse-terraform
+- name: terraform-source-dir
+- name: state-input-dir
+  optional: true
+- name: aux-input-1
+  optional: true
+- name: aux-input-2
+  optional: true
+- name: aux-input-3
+  optional: true
+- name: aux-input-4
+  optional: true
+- name: aux-input-5
+  optional: true
+- name: aux-input-6
+  optional: true
+- name: aux-input-7
+  optional: true
+- name: aux-input-8
+  optional: true
+outputs:
+- name: tfplan
+caches:
+- path: .tfcache
+params:
+  TF_WORKING_DIR: terraform-source-dir
+  TF_PLUGIN_CACHE: .tfcache
+  TF_DIR_PATH:
+  STATE_FILE_PATH:
+  ERROR_ON_NO_CHANGES:
+  DESTROY:
+  DEBUG:
+run:
+  path: /bin/sh
+  args:
+  - -c
+  - |
+    export PYTHONPATH="$(pwd)/concourse-terraform:${PYTHONPATH}"
+    concourse-terraform/bin/install-ssh-keys &&
+    concourse-terraform/bin/install-trusted-ca-certs &&
+    exec concourse-terraform/bin/concourse-terraform plan | tee tfplan/plan.txt
