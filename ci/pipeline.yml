@@ -1,0 +1,62 @@
+resource_types:
+- name: pull-request
+  type: docker-image
+  source:
+    repository: teliaoss/github-pr-resource
+
+resources:
+- name: source
+  type: git
+  check_every: 24h
+  source:
+    uri: https://github.com/jonm/s3pypi
+
+- name: pr
+  type: pull-request
+  check_every: 24h
+  source:
+    repository: jonm/s3pypi
+    access_token: ((github-access-token))
+    
+- name: concourse-terraform
+  type: git
+  source:
+    uri: https://github.com/Snapkitchen/concourse-terraform
+
+- name: concourse-terraform-image
+  type: docker-image
+  source:
+    repository: snapkitchen/concourse-terraform
+    tag: '0.11.14'
+    
+jobs:
+- name: build-pr
+  plan:
+  - get: pr
+    trigger: true
+    version: every
+  - get: concourse-terraform
+  - get: concourse-terraform-image
+  - task: terraform-plan
+    image: concourse-terraform-image
+    file: concourse-terraform/tasks/plan.yaml
+    params:
+      TF_BACKEND_TYPE: s3
+      TF_BACKEND_CONFIG_bucket: ((tf-bucket))
+      TF_BACKEND_CONFIG_KEY: s3pypi.tfstate
+      TF_BACKEND_CONFIG_REGION: ((tf-region))
+
+- name: build
+  plan:
+  - get: source
+    trigger: true
+  - get: concourse-terraform
+  - get: concourse-terraform-image
+  - task: terraform-plan
+    image: concourse-terraform-image
+    file: concourse-terraform/tasks/plan.yaml
+    params:
+      TF_BACKEND_TYPE: s3
+      TF_BACKEND_CONFIG_bucket: ((tf-bucket))
+      TF_BACKEND_CONFIG_KEY: s3pypi.tfstate
+      TF_BACKEND_CONFIG_REGION: ((tf-region))
