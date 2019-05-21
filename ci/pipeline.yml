@@ -66,3 +66,5 @@ jobs:
       TF_BACKEND_CONFIG_secret_key: ((aws-secret-access-key))
       TF_VAR_aws_access_key: ((aws-access-key-id))
       TF_VAR_aws_secret_key: ((aws-secret-access-key))
+  - task: show-plan
+    file: source/ci/task_show_plan.yml
