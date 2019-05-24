@@ -17,6 +17,10 @@ provider "aws" {
   secret_key = "${var.aws_secret_key}"
 }
 
-resource "aws_s3_bucket" "artifact_bucket" {
-  bucket = "s3pypi-artifacts"
+# resource "aws_s3_bucket" "artifact_bucket" {
+#  bucket = "s3pypi-artifacts"
+# }
+
+resource "aws_s3_bucket" "index_bucket" {
+  bucket = "s3pypi-index"
 }

@@ -72,7 +72,7 @@ while not eof:
             elif bold and not pending:
                 sys.stdout.write('**')
             green = red = bold = pending = False
-        elif i == 1 and not (red or green): # bold
+        elif i == 1 and not (red or green or bold): # bold
             bold = True
             pending = True
         elif i == 31:   # red
@@ -84,7 +84,7 @@ while not eof:
                 if not pending: sys.stdout.write('**\n- ')
                 bold = False
                 red = True
-            else:
+            elif not red:
                 red = True
                 pending = True
         elif i == 32: # green
@@ -96,7 +96,7 @@ while not eof:
                 if not pending: sys.stdout.write('**\n+ ')
                 bold = False
                 green = True
-            else:
+            elif not green:
                 green = True
                 pending = True
 
