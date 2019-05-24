@@ -35,16 +35,37 @@ jobs:
   - get: pr
     trigger: true
     version: every
+  - put: pr
+    params:
+      path: pr
+      status: PENDING
   - get: concourse-terraform
   - get: concourse-terraform-image
   - task: terraform-plan
     image: concourse-terraform-image
-    file: concourse-terraform/tasks/plan.yaml
+    file: pr/ci/task_tf_plan.yml
+    input_mapping: { terraform-source-dir: pr }
     params:
+      ERROR_ON_NO_CHANGES: false
       TF_BACKEND_TYPE: s3
       TF_BACKEND_CONFIG_bucket: ((tf-bucket))
       TF_BACKEND_CONFIG_key: s3pypi.tfstate
       TF_BACKEND_CONFIG_region: ((tf-region))
+      TF_BACKEND_CONFIG_access_key: ((aws-access-key-id))
+      TF_BACKEND_CONFIG_secret_key: ((aws-secret-access-key))
+      TF_VAR_aws_access_key: ((aws-access-key-id))
+      TF_VAR_aws_secret_key: ((aws-secret-access-key))
+    on_failure:
+      put: pr
+      params:
+        path: pr
+        status: FAILURE
+  - put: pr
+    params:
+      path: pr
+      status: SUCCESS
+      comment_file: tfplan/plan.txt
+    
 
 - name: build
   plan:
