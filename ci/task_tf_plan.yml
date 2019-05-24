@@ -41,4 +41,4 @@ run:
     export PYTHONPATH="$(pwd)/concourse-terraform:${PYTHONPATH}"
     concourse-terraform/bin/install-ssh-keys &&
     concourse-terraform/bin/install-trusted-ca-certs &&
-    exec concourse-terraform/bin/concourse-terraform plan | tee tfplan/plan.txt
+    sh -c "concourse-terraform/bin/concourse-terraform plan | terraform-source-dir/ci/term2md.py | tee tfplan/plan.txt"
