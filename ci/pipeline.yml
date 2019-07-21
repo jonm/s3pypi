@@ -64,7 +64,7 @@ jobs:
     params:
       path: pr
       status: SUCCESS
-      comment_file: tfplan/plan.txt
+      comment_file: tfplan/plan.md
     
 
 - name: build
