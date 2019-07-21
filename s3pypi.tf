@@ -8,12 +8,6 @@ variable "aws_access_key" {
 variable "aws_secret_key" {
 }
 
-terraform {
-  backend "s3" {
-    key = "s3pypi.tfstate"
-  }
-}
-
 provider "aws" {
   region     = var.region
   version    = "~> 2.11"
