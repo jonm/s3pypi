@@ -65,6 +65,7 @@ jobs:
   - get: concourse-terraform
   - task: terraform-apply
     file: source/ci/task_tf_apply.yml
+    input_mapping: { terraform-source-dir: source }
     params:
       ERROR_ON_NO_CHANGES: false
       TF_BACKEND_TYPE: s3
