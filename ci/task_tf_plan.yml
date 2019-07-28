@@ -1,5 +1,11 @@
 ---
 platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: jonm33/s3pypi-ci
+
 inputs:
 - name: concourse-terraform
 - name: terraform-source-dir
@@ -41,4 +47,4 @@ run:
     export PYTHONPATH="$(pwd)/concourse-terraform:${PYTHONPATH}"
     concourse-terraform/bin/install-ssh-keys &&
     concourse-terraform/bin/install-trusted-ca-certs &&
-    sh -c "concourse-terraform/bin/concourse-terraform plan | terraform-source-dir/ci/term2md.py | tee tfplan/plan.txt"
+    sh -c "concourse-terraform/bin/concourse-terraform plan | /usr/local/bin/term2md | tee tfplan/plan.md"
