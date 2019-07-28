@@ -40,9 +40,7 @@ jobs:
       path: pr
       status: PENDING
   - get: concourse-terraform
-  - get: concourse-terraform-image
   - task: terraform-plan
-    image: concourse-terraform-image
     file: pr/ci/task_tf_plan.yml
     input_mapping: { terraform-source-dir: pr }
     params:
@@ -64,8 +62,7 @@ jobs:
     params:
       path: pr
       status: SUCCESS
-      comment_file: tfplan/plan.txt
-    
+      comment_file: tfplan/plan.md
 
 - name: build
   plan:
