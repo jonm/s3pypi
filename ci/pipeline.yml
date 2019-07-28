@@ -69,11 +69,8 @@ jobs:
   - get: source
     trigger: true
   - get: concourse-terraform
-  - get: concourse-terraform-image
-  - task: terraform-plan
-    image: concourse-terraform-image
-    file: source/ci/task_tf_plan.yml
-    input_mapping: { terraform-source-dir: source }
+  - task: terraform-apply
+    file: source/ci/task_tf_apply.yml
     params:
       ERROR_ON_NO_CHANGES: false
       TF_BACKEND_TYPE: s3
@@ -84,5 +81,3 @@ jobs:
       TF_BACKEND_CONFIG_secret_key: ((aws-secret-access-key))
       TF_VAR_aws_access_key: ((aws-access-key-id))
       TF_VAR_aws_secret_key: ((aws-secret-access-key))
-  - task: show-plan
-    file: source/ci/task_show_plan.yml
