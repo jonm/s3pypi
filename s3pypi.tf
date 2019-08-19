@@ -19,3 +19,8 @@ resource "aws_s3_bucket" "artifact_bucket" {
 resource "aws_s3_bucket" "index_bucket" {
   bucket = "${var.name_prefix}-index"
 }
+
+resource "aws_sns_topic" "update_topic" {
+  name = "${var.name_prefix}-updates"
+}
+
