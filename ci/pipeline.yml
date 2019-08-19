@@ -45,6 +45,7 @@ jobs:
       TF_BACKEND_CONFIG_region: ((tf-region))
       TF_BACKEND_CONFIG_access_key: ((aws-access-key-id))
       TF_BACKEND_CONFIG_secret_key: ((aws-secret-access-key))
+      TF_VAR_name_prefix: s3pypi
       TF_VAR_aws_access_key: ((aws-access-key-id))
       TF_VAR_aws_secret_key: ((aws-secret-access-key))
     on_failure:
@@ -74,5 +75,6 @@ jobs:
       TF_BACKEND_CONFIG_region: ((tf-region))
       TF_BACKEND_CONFIG_access_key: ((aws-access-key-id))
       TF_BACKEND_CONFIG_secret_key: ((aws-secret-access-key))
+      TF_VAR_name_prefix: s3pypi
       TF_VAR_aws_access_key: ((aws-access-key-id))
       TF_VAR_aws_secret_key: ((aws-secret-access-key))

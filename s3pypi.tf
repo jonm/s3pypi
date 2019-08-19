@@ -1,6 +1,7 @@
 variable "region" {
   default = "us-east-1"
 }
+variable "name_prefix" {}
 variable "aws_access_key" {}
 variable "aws_secret_key" {}
 
@@ -12,9 +13,9 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "artifact_bucket" {
-  bucket = "s3pypi-artifacts"
+  bucket = "${var.name_prefix}-artifacts"
 }
 
 resource "aws_s3_bucket" "index_bucket" {
-  bucket = "s3pypi-index"
+  bucket = "${var.name_prefix}-index"
 }
