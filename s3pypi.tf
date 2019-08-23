@@ -22,5 +22,27 @@ resource "aws_s3_bucket" "index_bucket" {
 
 resource "aws_sns_topic" "update_topic" {
   name = "${var.name_prefix}-updates"
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": {"AWS":"*"},
+    "Action": "SNS:Publish",
+    "Resource": "arn:aws:sns:*:*:${var.name_prefix}-updates",
+    "Condition": {
+      "ArnLike" : { "aws:SourceArn": "${aws_s3_bucket.artifact_bucket.arn}" }
+    } 
+   }]
+}
+POLICY
+}
+
+resource "aws_s3_bucket_notification" "artifact_notification" {
+  bucket = "${aws_s3_bucket.artifact_bucket.id}"
+  topic {
+    topic_arn = "${aws_sns_topic.update_topic.arn}"
+    events = ["s3:ObjectCreated:*","s3:ObjectRemoved:*"]
+  }
 }
 
