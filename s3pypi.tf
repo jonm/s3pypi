@@ -156,9 +156,7 @@ resource "aws_iam_policy" "generate_proj_index" {
     {
       "Sid" : "",
       "Effect" : "Allow",
-      "Action" : [
-        "Action": "s3:*"
-      ],
+      "Action" : "s3:*",
       "Resource" : [
         "arn:aws:s3:::${aws_s3_bucket.index_bucket.bucket}/*/index.html"
       ]
