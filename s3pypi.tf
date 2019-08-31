@@ -4,6 +4,12 @@ variable "region" {
 variable "name_prefix" {}
 variable "aws_access_key" {}
 variable "aws_secret_key" {}
+variable "gen_index_version" {
+  default = "0.1.5"
+}
+variable "gen_proj_index_version" {
+  default = "0.1.1"
+}
 
 provider "aws" {
   region = var.region
@@ -38,11 +44,182 @@ resource "aws_sns_topic" "update_topic" {
 POLICY
 }
 
+
 resource "aws_s3_bucket_notification" "artifact_notification" {
   bucket = "${aws_s3_bucket.artifact_bucket.id}"
   topic {
     topic_arn = "${aws_sns_topic.update_topic.arn}"
     events = ["s3:ObjectCreated:*","s3:ObjectRemoved:*"]
   }
+}
+
+resource "aws_sns_topic" "rebuild_root_topic" {
+  name = "${var.name_prefix}-rebuild-root"
+}
+
+resource "aws_iam_role" "gen_index_role" {
+  name = "${var.name_prefix}-gen-index"
+  assume_role_policy = <<EOF
+{
+  "Version" : "2012-10-17",
+  "Statement" : [
+    { "Action" : "sts:AssumeRole",
+      "Principal" : {
+        "Service" : "lambda.amazonaws.com"
+      },
+      "Effect" : "Allow",
+      "Sid" : ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "gen_index_basic_lambda" {
+  role = "${aws_iam_role.gen_index_role.name}"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_policy" "generate_base_index" {
+  name = "${var.name_prefix}-generate-base-index"
+  policy = <<EOF
+{
+  "Version" : "2012-10-17",
+  "Statement" : [
+    { "Sid" : "",
+      "Effect" : "Allow",
+      "Action" : [
+        "s3:HeadBucket",
+        "s3:ListObjects"
+      ],
+      "Resource" : [
+        "arn:aws:s3:::${aws_s3_bucket.index_bucket.bucket}"
+      ]
+    },
+    {
+      "Sid" : "",
+      "Effect" : "Allow",
+      "Action" : "s3:*",
+      "Resource" : [
+        "arn:aws:s3:::${aws_s3_bucket.index_bucket.bucket}/index.html"
+      ]
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "gen_index_s3_access" {
+  role = "${aws_iam_role.gen_index_role.name}"
+  policy_arn = "${aws_iam_policy.generate_base_index.arn}"
+}
+
+resource "aws_iam_role" "gen_proj_index_role" {
+  name = "${var.name_prefix}-gen-proj-index"
+  assume_role_policy = <<EOF
+{
+  "Version" : "2012-10-17",
+  "Statement" : [
+    { "Action" : "sts:AssumeRole",
+      "Principal" : {
+        "Service" : "lambda.amazonaws.com"
+      },
+      "Effect" : "Allow",
+      "Sid" : ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "gen_proj_index_basic_lambda" {
+  role = "${aws_iam_role.gen_proj_index_role.name}"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_policy" "generate_proj_index" {
+  name = "${var.name_prefix}-generate-proj-index"
+  policy = <<EOF
+{
+  "Version" : "2012-10-17",
+  "Statement" : [
+    { "Sid" : "",
+      "Effect" : "Allow",
+      "Action" : [
+        "s3:HeadBucket",
+        "s3:ListObjects"
+      ],
+      "Resource" : [
+        "arn:aws:s3:::${aws_s3_bucket.artifact_bucket.bucket}"
+      ]
+    },
+    {
+      "Sid" : "",
+      "Effect" : "Allow",
+      "Action" : [
+        "Action": "s3:*"
+      ],
+      "Resource" : [
+        "arn:aws:s3:::${aws_s3_bucket.index_bucket.bucket}/*/index.html"
+      ]
+    },
+    {
+      "Sid" : "",
+      "Effect" : "Allow",
+      "Action" : "SNS:Publish",
+      "Resource": "${aws_sns_topic.rebuild_root_topic.arn}"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "gen_proj_index_s3_access" {
+  role = "${aws_iam_role.gen_proj_index_role.name}"
+  policy_arn = "${aws_iam_policy.generate_proj_index.arn}"
+}
+
+resource "aws_lambda_function" "gen_index_lambda" {
+  s3_bucket = "${var.name_prefix}-lambdas"
+  s3_key = "${var.name_prefix}-gen-index/${var.name_prefix}-gen-index-${var.gen_index_version}.zip"
+  function_name = "${var.name_prefix}-gen-index"
+  role = "${aws_iam_role.gen_index_role.arn}"
+  handler = "handler.handle"
+  runtime = "python3.7"
+  environment {
+    variables = {
+      INDEX_BUCKET = "${aws_s3_bucket.index_bucket.bucket}"
+    }
+  }
+}
+
+resource "aws_lambda_permission" "gen_index_from_sns" {
+  action = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.gen_index_lambda.function_name}"
+  principal = "sns.amazonaws.com"
+  source_arn = "${aws_sns_topic.rebuild_root_topic.arn}"
+}
+
+resource "aws_lambda_function" "gen_proj_index_lambda" {
+  s3_bucket = "${var.name_prefix}-lambdas"
+  s3_key = "${var.name_prefix}-gen-proj-index/${var.name_prefix}-gen-proj-index-${var.gen_proj_index_version}.zip"
+  function_name = "${var.name_prefix}-gen-proj-index"
+  role = "${aws_iam_role.gen_proj_index_role.arn}"
+  handler = "handler.handle"
+  runtime = "python3.7"
+  environment {
+    variables = {
+      INDEX_BUCKET = "${aws_s3_bucket.index_bucket.bucket}"
+      ARTIFACT_BUCKET = "${aws_s3_bucket.artifact_bucket.bucket}"
+      REBUILD_ROOT_TOPIC = "${aws_sns_topic.rebuild_root_topic.arn}"
+    }
+  }
+}
+
+resource "aws_lambda_permission" "gen_proj_index_from_sns" {
+  action = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.gen_proj_index_lambda.function_name}"
+  principal = "sns.amazonaws.com"
+  source_arn = "${aws_sns_topic.update_topic.arn}"
 }
 
