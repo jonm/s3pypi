@@ -203,6 +203,12 @@ resource "aws_lambda_permission" "gen_index_from_sns" {
   source_arn = "${aws_sns_topic.rebuild_root_topic.arn}"
 }
 
+resource "aws_sns_topic_subscription" "gen_index_sub" {
+  topic_arn = "${aws_sns_topic.rebuild_root_topic.arn}"
+  protocol = "lambda"
+  endpoint = "${aws_lambda_function.gen_index_lambda.arn}"
+}
+
 resource "aws_lambda_function" "gen_proj_index_lambda" {
   s3_bucket = "${var.name_prefix}-lambdas"
   s3_key = "${var.name_prefix}-gen-proj-index/${var.name_prefix}-gen-proj-index-${var.gen_proj_index_version}.zip"
@@ -224,5 +230,11 @@ resource "aws_lambda_permission" "gen_proj_index_from_sns" {
   function_name = "${aws_lambda_function.gen_proj_index_lambda.function_name}"
   principal = "sns.amazonaws.com"
   source_arn = "${aws_sns_topic.update_topic.arn}"
+}
+
+resource "aws_sns_topic_subscription" "gen_proj_index_sub" {
+  topic_arn = "${aws_sns_topic.update_topic.arn}"
+  protocol = "lambda"
+  endpoint = "${aws_lambda_function.gen_proj_index_lambda.arn}"
 }
 
