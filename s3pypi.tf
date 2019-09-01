@@ -21,11 +21,35 @@ provider "aws" {
 resource "aws_s3_bucket" "artifact_bucket" {
   bucket = "${var.name_prefix}-artifacts"
   acl = "public-read"
+  policy = <<POLICY
+{ "Version" : "2012-10-17",
+  "Statement" : [
+    { "Sid" : "",
+      "Effect" : "Allow",
+      "Principal" : "*",
+      "Action" : ["s3:GetObject"],
+      "Resource" : "arn:aws:s3:::${var.name_prefix}-artifacts/*"
+    }
+  ]
+}
+POLICY
 }
 
 resource "aws_s3_bucket" "index_bucket" {
   bucket = "${var.name_prefix}-index"
   acl = "public-read"
+  policy = <<POLICY
+{ "Version" : "2012-10-17",
+  "Statement" : [
+    { "Sid" : "",
+      "Effect" : "Allow",
+      "Principal" : "*",
+      "Action" : ["s3:GetObject"],
+      "Resource" : "arn:aws:s3:::${var.name_prefix}-index/*"
+    }
+  ]
+}
+POLICY
   website {
     index_document = "index.html"
   }
