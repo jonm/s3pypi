@@ -20,10 +20,15 @@ provider "aws" {
 
 resource "aws_s3_bucket" "artifact_bucket" {
   bucket = "${var.name_prefix}-artifacts"
+  acl = "public-read"
 }
 
 resource "aws_s3_bucket" "index_bucket" {
   bucket = "${var.name_prefix}-index"
+  acl = "public-read"
+  website {
+    index_document = "index.html"
+  }
 }
 
 resource "aws_sns_topic" "update_topic" {
