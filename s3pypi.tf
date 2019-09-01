@@ -5,10 +5,10 @@ variable "name_prefix" {}
 variable "aws_access_key" {}
 variable "aws_secret_key" {}
 variable "gen_index_version" {
-  default = "0.1.5"
+  default = "0.1.6"
 }
 variable "gen_proj_index_version" {
-  default = "0.1.4"
+  default = "0.1.5"
 }
 
 provider "aws" {
