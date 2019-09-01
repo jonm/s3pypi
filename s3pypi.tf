@@ -8,7 +8,7 @@ variable "gen_index_version" {
   default = "0.1.5"
 }
 variable "gen_proj_index_version" {
-  default = "0.1.1"
+  default = "0.1.2"
 }
 
 provider "aws" {
