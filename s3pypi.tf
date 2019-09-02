@@ -268,7 +268,7 @@ resource "aws_cloudfront_distribution" "index_distrib" {
   is_ipv6_enabled = true
   origin {
     origin_id = "${var.name_prefix}-origin"
-    domain_name = "${aws_s3_bucket.index_bucket.website_domain}"
+    domain_name = "${aws_s3_bucket.index_bucket.bucket}.${aws_s3_bucket.index_bucket.website_domain}"
     custom_origin_config {
       http_port = 80
       https_port = 443
