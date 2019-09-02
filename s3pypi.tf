@@ -268,8 +268,15 @@ resource "aws_cloudfront_distribution" "index_distrib" {
   is_ipv6_enabled = true
   origin {
     origin_id = "${var.name_prefix}-origin"
-    domain_name = "${aws_s3_bucket.index_bucket.bucket_regional_domain_name}"
+    domain_name = "${aws_s3_bucket.index_bucket.website_domain}"
+    custom_origin_config {
+      http_port = 80
+      https_port = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols = ["TLSv1.2"]
+    }
   }
+  default_root_object = "index.html"
   restrictions {
     geo_restriction {
       restriction_type = "none"
