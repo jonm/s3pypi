@@ -268,7 +268,7 @@ resource "aws_cloudfront_distribution" "index_distrib" {
   is_ipv6_enabled = true
   origin {
     origin_id = "${var.name_prefix}-origin"
-    domain_name = "s3pypi-index.s3-website-us-east-1.amazonaws.com"
+    domain_name = "${aws_s3_bucket.index_bucket.bucket}.s3-website-${var.region}.amazonaws.com"
   }
   restrictions {
     geo_restriction {
