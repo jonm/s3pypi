@@ -289,7 +289,7 @@ resource "aws_cloudfront_distribution" "index_distrib" {
     allowed_methods = ["GET","HEAD","OPTIONS"]
     cached_methods = ["GET","HEAD"]
     compress = true
-    default_ttl = 300
+    default_ttl = 0
     target_origin_id = "${var.name_prefix}-origin"
     viewer_protocol_policy = "redirect-to-https"
     forwarded_values {
