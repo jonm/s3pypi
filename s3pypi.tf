@@ -263,3 +263,33 @@ resource "aws_sns_topic_subscription" "gen_proj_index_sub" {
   endpoint = "${aws_lambda_function.gen_proj_index_lambda.arn}"
 }
 
+resource "aws_cloudfront_distribution" "index_distrib" {
+  enabled = true
+  is_ipv6_enabled = true
+  origin {
+    origin_id = "${var.name_prefix}-origin"
+    domain_name = "${aws_s3_bucket.index_bucket.bucket}.s3-website-${var.region}.amazonaws.com"
+  }
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+  viewer_certificate {
+    cloudfront_default_certificate = true
+  }
+  default_cache_behavior {
+    allowed_methods = ["GET","HEAD","OPTIONS"]
+    cached_methods = ["GET","HEAD"]
+    compress = true
+    default_ttl = 300
+    target_origin_id = "${var.name_prefix}-origin"
+    viewer_protocol_policy = "redirect-to-https"
+    forwarded_values {
+      query_string = false
+      cookies {
+	forward = "none"
+      }
+    }
+  }
+}
