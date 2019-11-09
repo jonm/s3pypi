@@ -13,7 +13,7 @@ variable "gen_proj_index_version" {
 
 provider "aws" {
   region = var.region
-  version = "~> 2.11"
+  version = "~> 2.35"
   access_key = var.aws_access_key
   secret_key = var.aws_secret_key
 }
