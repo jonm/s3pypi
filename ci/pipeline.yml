@@ -27,7 +27,6 @@ jobs:
 - name: build-pr
   plan:
   - get: pr
-    trigger: true
     version: every
   - put: pr
     params:
@@ -62,7 +61,6 @@ jobs:
 - name: build
   plan:
   - get: source
-    trigger: true
   - get: concourse-terraform
   - task: terraform-apply
     file: source/ci/task_tf_apply.yml
